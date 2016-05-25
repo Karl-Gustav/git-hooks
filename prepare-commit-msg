@@ -4,20 +4,34 @@ import sys, re
 from subprocess import check_output as cmd
 
 ISSUE_NUMBER_REGEX = re.compile('#\d+')
+TYPE_AND_SCOPE_REGEX = re.compile('\w+\(\w+\)')
 
 def main():
     commit_message_file = sys.argv[1]
-    branch_path = cmd(['git', 'symbolic-ref', '-q', 'HEAD']).strip() #refs/heads/...
+    branch_path = cmd([
+        'git', 
+        'symbolic-ref', 
+        '-q', 
+        'HEAD'
+    ]).strip() #refs/heads/...
     branch_name = branch_path.split('/')[-1]
     issue_number = findIssueNumber(branch_path)
     commit_message = readFile(commit_message_file)
-    first_line = commit_message.splitlines() [0]
+    first_line = commit_message.splitlines()[0]
+    type_and_scope = findTypeAndScope(branch_path)
     
     if not first_line:
-        message = branch_name + ': '
+        message = type_and_scope or branch_name
+        message += ': '
         if issue_number:
             message += '\n\nref: ' + issue_number
         writeFile(commit_message_file, message + commit_message)
+
+def findTypeAndScope(heystack):
+    match = TYPE_AND_SCOPE_REGEX.search(heystack)
+    if match:
+       return match.group(0)
+    return ''
 
 def findIssueNumber(heystack):
     match = ISSUE_NUMBER_REGEX.search(heystack)
