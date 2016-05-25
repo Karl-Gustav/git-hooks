@@ -3,6 +3,8 @@
 import sys, re
 from subprocess import check_output as cmd
 
+ISSUE_NUMBER_REGEX = re.compile('#\d+')
+
 def main():
     commit_message_file = sys.argv[1]
     branch_path = cmd(['git', 'symbolic-ref', '-q', 'HEAD']).strip() #refs/heads/...
@@ -13,7 +15,19 @@ def main():
     
     if not first_line:
         message = branch_name + ': '
+        if issue_number:
+            message += '\n\nref: ' + issue_number
         writeFile(commit_message_file, message + commit_message)
+
+def findIssueNumber(heystack):
+    match = ISSUE_NUMBER_REGEX.search(heystack)
+    if match:
+       return match.group(0)
+    return ''
+
+def readFile(path):
+    with open(path) as f:
+        return f.read()
 
 def writeFile(path, text):
     with open(path, 'w') as f:
