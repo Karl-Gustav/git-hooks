@@ -15,14 +15,18 @@ def main():
         'HEAD'
     ]).strip() #refs/heads/...
     branch_name = branch_path.split('/')[-1]
+    pretty_branch_name = branch_name.split('_')[0]
     issue_number = findIssueNumber(branch_path)
     commit_message = readFile(commit_message_file)
     first_line = commit_message.splitlines()[0]
     type_and_scope = findTypeAndScope(branch_path)
     
     if not first_line:
-        message = type_and_scope or branch_name
-        message += ': '
+        if type_and_scope:
+            message = type_and_scope + ': '
+        else:
+            message = pretty_branch_name + ': '
+
         if issue_number:
             message += '\n\nref: ' + issue_number
         writeFile(commit_message_file, message + commit_message)
@@ -46,7 +50,6 @@ def readFile(path):
 def writeFile(path, text):
     with open(path, 'w') as f:
         return f.write(text)
-
 
 if __name__ == '__main__': main()
 
