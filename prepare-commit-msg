@@ -7,25 +7,27 @@ ISSUE_NUMBER_REGEX = re.compile('#\d+')
 
 def main():
     commit_message_file = sys.argv[1]
-    branch_path = cmd([
-        'git', 
-        'symbolic-ref', 
-        '-q', 
-        'HEAD'
-    ]).strip() #refs/heads/...
-    branch_name = branch_path.split('/')[-1]
-    pretty_branch_name = branch_name.split('_')[0]
-    issue_number = findIssueNumber(branch_path)
     commit_message = readFile(commit_message_file)
     first_line = commit_message.splitlines()[0]
     
     if not first_line:
+        branch_path = cmd([
+            'git', 
+            'symbolic-ref', 
+            '-q', 
+            'HEAD'
+        ]).strip() #refs/heads/...
+        branch_name = branch_path.split('/')[-1]
+        pretty_branch_name = branch_name.split('_')[0]
+        issue_number = findIssueNumber(branch_path)
+
         if pretty_branch_name:
             message = pretty_branch_name + ': '
 
         if issue_number:
             message += '\n\nref: ' + issue_number
         writeFile(commit_message_file, message + commit_message)
+
 def findIssueNumber(heystack):
     match = ISSUE_NUMBER_REGEX.search(heystack)
     if match:
