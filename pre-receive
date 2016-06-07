@@ -1,0 +1,51 @@
+#!/bin/bash
+
+outputDir=/srv/node/8080/
+sourceBranch=master
+supervisorAppName=8080
+
+read oldrev newrev refname
+
+echo
+
+function quitPastPointOfNoReturn {
+    echo -e "\nThe content of $outputDir has now been changed, therefore we are allowing Git to update the branch."
+    echo -e "But it's advisable to reset the branch with \`git push <remote name> <old master>:master\` fix the content of $outputDir\n"
+    exit
+}
+
+# Export to output dir if the correct branch is selected
+if [[ "$refname" == "refs/heads/$sourceBranch" ]]; then
+
+        # Delete output dir content
+        if [[ "$outputDir" != "" && "$outputDir" != "/" ]]; then
+                rm $outputDir* -fr && echo "Deleted $outputDir* content"
+        fi
+
+        if ( git archive $newrev | tar -x -C $outputDir ); then
+                echo -e "Extracted the $sourceBranch branch to $outputDir\n"
+
+                echo -e "Running \`npm install --production\`\n"
+                if ( cd $outputDir && npm install --production ); then
+                    echo -e "npm install ran OK\n"
+
+                    echo -e "Restarting the app\n"
+                    if ( supervisorctl restart $supervisorAppName ); then
+                        echo -e "App restarted.\n"
+                    else
+                        echo -e "Restarting the app failed. The new content might not appear when using the app.\n"
+                        quitPastPointOfNoReturn
+                    fi
+                else
+                    echo -e "npm install failed. This deploy migth not work as expected"
+                    quitPastPointOfNoReturn
+                fi
+        else
+                echo -e "The extraction failed, see above message. Aborting deploy.\n"
+                quitPastPointOfNoReturn
+        fi
+
+else
+        echo -e "The update is not on the $sourceBranch branch, won't copy the files to $outputDir\n"
+        exit 1
+fi
