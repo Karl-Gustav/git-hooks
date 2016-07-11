@@ -22,7 +22,11 @@ def main():
         issue_number = findIssueNumber(branch_path)
 
         if pretty_branch_name:
-            message = pretty_branch_name + ': '
+            if '-' in pretty_branch_name:
+                message = '%s(%s):' % tuple(
+                        pretty_branch_name.split('-', 1))
+            else:
+                message = pretty_branch_name + ': '
 
         if issue_number:
             message += '\n\nref: ' + issue_number
