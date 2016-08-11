@@ -1,0 +1,12 @@
+#!/bin/bash
+
+read newref newsha oldref oldsha
+
+if [ "$oldref" == "refs/heads/develop" ] ;then
+	read -p "Are you sure you want to push to develop [y/N]? " confirmation </dev/tty
+	if [ "$confirmation" == "y" ] || [ "$confirmation" == "Y" ] ; then
+		exit 0
+	else
+		exit 1
+	fi
+fi
