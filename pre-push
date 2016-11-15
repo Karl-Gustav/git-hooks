@@ -1,12 +1,16 @@
-#!/bin/bash
+#!/usr/bin/python
 
-read newref newsha oldref oldsha
+import sys
 
-if [ "$oldref" == "refs/heads/develop" ] ;then
-	read -p "Are you sure you want to push to develop [y/N]? " confirmation </dev/tty
-	if [ "$confirmation" == "y" ] || [ "$confirmation" == "Y" ] ; then
-		exit 0
-	else
-		exit 1
-	fi
-fi
+newref, newsha, oldref, oldsha = sys.stdin.read().split()
+
+safe_branches = ['develop', 'pilot']
+
+for branch in safe_branches:
+    if oldref == 'refs/heads/' + branch:
+        sys.stdin = open('/dev/tty')
+        confirm = raw_input('Are you sure you want to push %s? [y/N] ' % branch)
+        if confirm.strip().lower().startswith('y'):
+            sys.exit(0)
+        else:
+            sys.exit(1)
