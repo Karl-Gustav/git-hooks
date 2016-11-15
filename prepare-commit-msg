@@ -13,13 +13,15 @@ def main():
     first_line = commit_message.splitlines()[0]
     
     if not first_line:
-        branch_path = cmd([
-            'git', 
-            'symbolic-ref', 
-            '-q', 
-            'HEAD'
-        ]).strip() #refs/heads/...
-        print branch_path
+        try:
+            branch_path = cmd([
+                'git', 
+                'symbolic-ref', 
+                '-q', 
+                'HEAD'
+            ]).strip() #refs/heads/...
+        except:
+            sys.exit(0)
 
         match = BRANCH_STRUCTURE_REGEX.search(branch_path)
 
@@ -31,7 +33,7 @@ def main():
             if issue_number:
                 message += '\n\nref: ' + issue_number
 
-        writeFile(commit_message_file, message + commit_message)
+            writeFile(commit_message_file, message + commit_message)
 
 def readFile(path):
     with open(path) as f:
