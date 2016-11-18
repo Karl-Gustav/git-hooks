@@ -2,7 +2,12 @@
 
 import sys
 
-newref, newsha, oldref, oldsha = sys.stdin.read().split()
+arguments = sys.stdin.read().split()
+
+if len(arguments) == 4:
+    newref, newsha, oldref, oldsha = arguments
+else:
+    sys.exit(0)
 
 safe_branches = ['develop', 'pilot']
 
