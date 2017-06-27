@@ -4,20 +4,20 @@ import sys, re
 from subprocess import check_output as cmd
 
 BRANCH_STRUCTURE_REGEX = re.compile(
-    'refs/heads/([^/]+)/.*/([^_]+)(?:[^#]*(#\d+))?'
+    'refs/heads/([^/]+)/.*/([^_]+)(?:[^#]*#(\S+))?'
 )
 
 def main():
     commit_message_file = sys.argv[1]
     commit_message = readFile(commit_message_file)
     first_line = commit_message.splitlines()[0]
-    
+
     if not first_line:
         try:
             branch_path = cmd([
-                'git', 
-                'symbolic-ref', 
-                '-q', 
+                'git',
+                'symbolic-ref',
+                '-q',
                 'HEAD'
             ]).strip() #refs/heads/...
         except:
