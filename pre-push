@@ -1,21 +1,25 @@
 #!/usr/bin/python
 
 import sys
+from subprocess import check_output as cmd
 
-arguments = sys.stdin.read().split()
+arguments = sys.argv
 
-if len(arguments) == 4:
-    newref, newsha, oldref, oldsha = arguments
+if len(arguments) == 3:
+    script, remoteName, remoteUr  = arguments
 else:
     sys.exit(0)
+currentBranch = cmd('git symbolic-ref HEAD'.split()).strip()
+dangerousBranches = [
+    'refs/heads/develop',
+    'refs/heads/pilot',
+    'refs/heads/master'
+]
 
-safe_branches = ['develop', 'pilot']
-
-for branch in safe_branches:
-    if oldref == 'refs/heads/' + branch:
-        sys.stdin = open('/dev/tty')
-        confirm = raw_input('Are you sure you want to push %s? [y/N] ' % branch)
-        if confirm.strip().lower().startswith('y'):
-            sys.exit(0)
-        else:
-            sys.exit(1)
+if currentBranch in dangerousBranches:
+    sys.stdin = open('/dev/tty')
+    confirm = raw_input('Are you sure you want to push %s? [y/N] ' % currentBranch)
+    if confirm.strip().lower().startswith('y'):
+        sys.exit(0)
+    else:
+        sys.exit(1)
