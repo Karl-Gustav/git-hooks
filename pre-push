@@ -1,25 +1,39 @@
 #!/usr/bin/python
 
 import sys
-from subprocess import check_output as cmd
 
-arguments = sys.argv
+inputs = sys.stdin.read().split()
+numberOfArgs = len(inputs)
 
-if len(arguments) == 3:
-    script, remoteName, remoteUr  = arguments
-else:
-    sys.exit(0)
-currentBranch = cmd('git symbolic-ref HEAD'.split()).strip()
-dangerousBranches = [
-    'refs/heads/develop',
-    'refs/heads/pilot',
-    'refs/heads/master'
-]
-
-if currentBranch in dangerousBranches:
-    sys.stdin = open('/dev/tty')
-    confirm = raw_input('Are you sure you want to push %s? [y/N] ' % currentBranch)
-    if confirm.strip().lower().startswith('y'):
+def main():
+    if numberOfArgs < 4 or numberOfArgs % 2 != 0:
+        print "Funny number of branches", numberOfArgs, inputs
         sys.exit(0)
     else:
-        sys.exit(1)
+        fromBranch = Brach(inputs[0], inputs[1])
+        changes = zip(inputs[2::2],inputs[3::2])
+        toBranches = [Brach(x[0], x[1]) for x in changes]
+
+    dangerousBranches = [
+        'refs/heads/develop',
+        'refs/heads/pilot',
+        'refs/heads/master'
+    ]
+
+    for pushedTo in toBranches:
+        if pushedTo.name in dangerousBranches:
+            sys.stdin = open('/dev/tty')
+            confirm = raw_input('Are you sure you want to push %s? [y/N] ' % pushedTo.name)
+            if confirm.strip().lower().startswith('y'):
+                sys.exit(0)
+            else:
+                sys.exit(1)
+
+class Brach():
+    def __init__(self, name, sha1):
+        self.name = name
+        self.sha1 = sha1
+    def __str__(self):
+        return self.name + ' ' + self.sha1
+
+if __name__ == '__main__': main()
