@@ -6,6 +6,8 @@ inputs = sys.stdin.read().split()
 numberOfArgs = len(inputs)
 
 def main():
+    if 0 == numberOfArgs: 
+        sys.exit(0)
     if numberOfArgs < 4 or numberOfArgs % 2 != 0:
         print "Funny number of branches", numberOfArgs, inputs
         sys.exit(0)
